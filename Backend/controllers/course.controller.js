@@ -178,3 +178,5 @@ export const buyCourses = catchAsyncError(async (req, res, next) => {
         return next(error); // Forward error to the global error handler
     }
 });
+
+

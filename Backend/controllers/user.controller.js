@@ -6,6 +6,9 @@ import { z } from "zod";
 import { sendToken } from "../utils/sendToken.js";
 import jwt from "jsonwebtoken"
 import crypto from "crypto"
+import { Purchase } from "../models/purchase.model.js";
+import { Course } from "../models/course.model.js"
+
 
 export const signUp = catchAsyncError(async (req, res, next) => {
     try {
@@ -364,4 +367,38 @@ export const resetPassword = catchAsyncError(async (req, res, next) => {
     await user.save(); 
     sendToken(user, 200, "Reset Password Successfully!", res)
 })
+
+
+
+
+export const purchases = catchAsyncError(async (req, res, next) => {
+    // req.userId is come from middleware
+    const userId = req.userId;
+
+    try {
+        const purchasedCourses = await Purchase.find({ userId });
+        if (!purchasedCourses || purchasedCourses.length === 0) {
+            return res.json({ message: "No courses purchased" });
+        }
+
+        // Extracting course IDs from purchasedCourses
+        const purchasedCoursesId = purchasedCourses.map(purchase => purchase.courseId);
+
+        // Fetching course data
+        const courseData = await Course.find({
+            _id: { $in: purchasedCoursesId }
+        });
+
+        return res.status(202).json({
+            success: true,
+            message: "Courses found successfully!",
+            purchasedCourses,
+            courseData
+        });
+    } catch (error) {
+        return next(error);
+    }
+});
+
+
 
