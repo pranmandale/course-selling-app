@@ -45,7 +45,7 @@ cloudinary.config({
 import courseRoute from "./routes/course.route.js"
 // http://localhost:4000/api/v1/course/
 app.use("/api/v1/course", courseRoute);
-// 2.20
+
 
 
 
@@ -55,6 +55,12 @@ import userRoute from "./routes/user.route.js"
 import cookieParser from "cookie-parser";
 // http://localhost:4000/api/v1/user/
 app.use("/api/v1/user", userRoute);
+
+
+
+import AdminRoute from "./routes/admin.route.js"
+// http://localhost:4000/api/v1/admin/
+app.use("/api/v1/admin", AdminRoute)
 
 
 

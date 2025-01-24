@@ -129,7 +129,8 @@ const sendVerificationCode = async (verificationCode, email) => {
         await sendEmail({ email, subject: "Your Verification Code", message });
 
         // Only log success, do not send a response here
-        console.log("Verification email sent successfully!");
+        // console.log("Verification email sent successfully!");
+       
     } catch (error) {
         console.error("Error sending verification email:", error);
 
@@ -259,7 +260,6 @@ export const login = catchAsyncError(async (req, res, next) => {
 export const logOut = catchAsyncError(async (req, res, next) => {
 
     try {
-        // const token = req.cookie.token;
         const token = req.cookies.token;
         if (!token) {
             return next(new ErrorHandler("No Token found!", 404))
@@ -294,6 +294,10 @@ export const getUser = catchAsyncError(async (req, res, next) => {
         success: true,
         user
     })
+
+    // res.status(200).json({
+    //     message: "Hello Pranav",
+    // })
 })
 
 
