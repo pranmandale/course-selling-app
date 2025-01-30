@@ -26,11 +26,13 @@ app.use(fileUpload({
     tempFileDir: '/tmp/'
 }));
 app.use(session({
-    secret: 'your-secret-key',
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
-    cookie: { maxAge: 5 * 60 * 1000 }, // 5-minute expiration
+    cookie: { maxAge: 10 * 60 * 1000 }, // 5-minute expiration
 }));
+
+// cookie-parser helps to read jwt token from cookies
 app.use(cookieParser())
 
 // cloudinary configuration code

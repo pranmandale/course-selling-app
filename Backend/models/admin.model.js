@@ -1,7 +1,7 @@
 import mongoose from "mongoose"
 import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
-
+import crypto from "crypto"
 
 const adminSchema = new mongoose.Schema({
     firstName: {
@@ -70,6 +70,19 @@ adminSchema.methods.generateToken = async function () {
     return jwt.sign({ id: this._id }, process.env.JWT_SECRET_ADMIN, {
         expiresIn: process.env.JWT_ADMIN_EXPIRY
     })
+}
+
+
+// in this function reset password token is generated
+adminSchema.methods.generateResetPasswordToken = function () {
+    const resetToken = crypto.randomBytes(20).toString("hex");
+
+    this.resetPasswordToken = crypto.createHash("sha256").update(resetToken).digest("hex")
+
+    this.resetPasswordExpire = Date.now() + 10 * 60 * 1000;
+
+    return resetToken;
+
 }
 
 

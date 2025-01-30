@@ -65,7 +65,7 @@ export const signUp = catchAsyncError(async (req, res, next) => {
         })
         
         if (existingUser) {
-            return next(new ErrorHandler("User Already exists", 404))
+            return next(new ErrorHandler("User Already exists, login!", 404))
         }
 
         const registerAttemptByUser = await User.find({
@@ -128,7 +128,6 @@ const sendVerificationCode = async (verificationCode, email) => {
         const message = generateEmailTemplate(verificationCode);
         await sendEmail({ email, subject: "Your Verification Code", message });
 
-        // Only log success, do not send a response here
         // console.log("Verification email sent successfully!");
        
     } catch (error) {
@@ -212,11 +211,9 @@ export const verifyOTP = catchAsyncError(async (req, res, next) => {
         // Clear the session to avoid reuse of OTP
         req.session.tempUser = null;
 
-        return res.status(201).json({
-            success: true,
-            message: "User registered and verified successfully!",
-            user,
-        });
+        sendToken(user, 200, "User registered and verified successfully!", res)
+
+        
     } catch (error) {
         return next(error);
     }
@@ -278,7 +275,7 @@ export const logOut = catchAsyncError(async (req, res, next) => {
             httpOnly: true,
         }).json({
             success: true,
-            message: `${user.email} logged out successful`
+            message: `${user.lastName} logged out successful`
         })
     } catch (error) {
         return next(error)
@@ -323,6 +320,8 @@ export const forgotPassword = catchAsyncError(async (req, res, next) => {
     const resetPasswordUrl = `${process.env.FRONTEND_URL}/password/reset/${resetPasswordToken}`
 
     const message = `Your Reset password url is \n\n ${resetPasswordUrl} \n\n`
+
+    
 
     try {
         sendEmail({

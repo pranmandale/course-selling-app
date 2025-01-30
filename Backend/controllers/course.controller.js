@@ -8,6 +8,8 @@ import { Purchase } from "../models/purchase.model.js";
 
 // this function is for creating a new course
 export const createCourse = catchAsyncError(async (req, res, next) => {
+    const adminId = req.adminId;
+    
     try {
         const { title, description, price } = req.body;
         if (!title || !description || !price ) {
@@ -40,6 +42,9 @@ export const createCourse = catchAsyncError(async (req, res, next) => {
                 public_id: cloud_response.public_id,
                 url: cloud_response.secure_url,
             },
+            // we are sending adminId here also to check which admin has created this course
+            creatorId: adminId,
+            
         }
         const course = await Course.create(courseData)
         res.status(200)
@@ -57,12 +62,25 @@ export const createCourse = catchAsyncError(async (req, res, next) => {
 // this function is for updating a course based on id passed in URL or get by params
 export const updateCourse = catchAsyncError(async (req, res, next) => {
     try {
+        const adminId = req.adminId;
         const { courseId } = req.params;
         const { title, description, price, image } = req.body;
 
+
+        const courseSearch = await Course.findById(courseId)
+        if (!courseSearch) {
+            return next(new ErrorHandler("Course Not Found! please try again", 404))
+        }
+
         
-        const course = await Course.findByIdAndUpdate(
-            courseId, // Find by courseId
+        // const course = await Course.findByIdAndUpdate(
+        const course = await Course.updateOne(
+            // courseId, // Find by courseId
+            {
+                _id: courseId,
+                creatorId: adminId,
+            },
+            
             {
                 title,
                 description,
@@ -93,9 +111,11 @@ export const updateCourse = catchAsyncError(async (req, res, next) => {
 // this function is for deleting a course based on id passed in url or get by params
 export const deleteCourse = catchAsyncError(async (req, res, next) => {
     const { courseId } = req.params;
+    const adminId = req.adminId;
     try {
         const course = await Course.findOneAndDelete({
             _id: courseId,
+            creatorId: adminId,
         })
 
         if (!course) {

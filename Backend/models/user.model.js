@@ -50,6 +50,7 @@ const userSchema = new mongoose.Schema({
     }
 })
 
+// before saving the user into schema  this function will automatically execute
 userSchema.pre("save", async function (next) {
     // if the password is not modified then call to next
     if (!this.isModified("password")) {
@@ -62,11 +63,12 @@ userSchema.pre("save", async function (next) {
 })
 
 
+// this function is for comparing password
 userSchema.methods.comparePassword = async function (enteredPassword) {
     return await bcrypt.compare(enteredPassword, this.password);
 }
 
-
+// this function is for creating token 
 userSchema.methods.generateToken = async function () {
     return jwt.sign({ id: this._id }, process.env.JWT_SECRET, {
         expiresIn: process.env.JWT_EXPIRE
