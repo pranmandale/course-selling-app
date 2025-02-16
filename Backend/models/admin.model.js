@@ -51,7 +51,7 @@ const adminSchema = new mongoose.Schema({
 
 
 adminSchema.pre("save", async function (next) {
-    // if the password is not updated and this function is called then 
+    // if the password is not updated and this function is called then op
     // automatically calls next() function
     if (!this.isModified("password")) {
         next()
