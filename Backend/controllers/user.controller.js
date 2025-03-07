@@ -17,12 +17,16 @@ export const signUp = catchAsyncError(async (req, res, next) => {
         if (!firstName || !lastName || !email || !phone || !password) {
             return next(new ErrorHandler("all fields are required", 400));
         }
+        
+
         const userSchema = z.object({
             firstName: z.string().min(2, { message: "FirstName should be at least 2 characters long" }),
             lastName: z.string().min(2, { message: "LastName should be at least 2 characters long" }),
             email: z.string().email(),
+            phone: z.string().regex(/^\+91[6-9]\d{9}$/, { message: "Invalid Phone Number!" }), // Add this line
             password: z.string().min(5, { message: "Password must be at least 5 characters long" }),
-        })
+        });
+
 
         const validateData = userSchema.safeParse(req.body)
         if (!validateData.success) {
@@ -97,6 +101,7 @@ export const signUp = catchAsyncError(async (req, res, next) => {
             verificationCodeExpire,
         };
         sendVerificationCode(verificationCode, email, res);
+        console.log("verification email sent to your email")
 
         return res.status(200).json({
             success: true,
@@ -174,18 +179,66 @@ function generateEmailTemplate(verificationCode) {
 
 
 
+// export const verifyOTP = catchAsyncError(async (req, res, next) => {
+//     // const { email, otp } = req.body;
+
+//     const {  otp } = req.body;
+
+//     try {
+//         // Get the temporary user from the session
+//         const tempUser = req.session.tempUser;
+
+//         if (!tempUser || tempUser.email !== email) {
+//             return next(new ErrorHandler("Invalid or expired session. Please sign up again.", 400));
+//         }
+
+//         const { verificationCode, verificationCodeExpire, firstName, lastName, phone, password } = tempUser;
+
+//         // Check if the OTP matches
+//         if (Number(otp) !== verificationCode) {
+//             return next(new ErrorHandler("Invalid OTP!", 400));
+//         }
+
+//         // Check if the OTP has expired
+//         const currentTime = Date.now();
+//         if (currentTime > verificationCodeExpire) {
+//             return next(new ErrorHandler("Verification code expired!", 400));
+//         }
+
+//         // Create and save the user in the database
+//         const user = await User.create({
+//             firstName,
+//             lastName,
+//             email,
+//             phone,
+//             password,
+//             accountVerified: true, // Mark the account as verified
+//         });
+
+//         // Clear the session to avoid reuse of OTP
+//         req.session.tempUser = null;
+
+//         sendToken(user, 200, "User registered and verified successfully!", res)
+
+        
+//     } catch (error) {
+//         return next(error);
+//     }
+// });
+
+
 export const verifyOTP = catchAsyncError(async (req, res, next) => {
-    const { email, otp } = req.body;
+    const { otp } = req.body;
 
     try {
         // Get the temporary user from the session
         const tempUser = req.session.tempUser;
 
-        if (!tempUser || tempUser.email !== email) {
-            return next(new ErrorHandler("Invalid or expired session. Please sign up again.", 400));
+        if (!tempUser) {
+            return next(new ErrorHandler("No temporary user found. Please start the process again.", 400));
         }
 
-        const { verificationCode, verificationCodeExpire, firstName, lastName, phone, password } = tempUser;
+        const { verificationCode, verificationCodeExpire, firstName, lastName, phone, password, email } = tempUser;
 
         // Check if the OTP matches
         if (Number(otp) !== verificationCode) {
@@ -211,9 +264,8 @@ export const verifyOTP = catchAsyncError(async (req, res, next) => {
         // Clear the session to avoid reuse of OTP
         req.session.tempUser = null;
 
-        sendToken(user, 200, "User registered and verified successfully!", res)
+        sendToken(user, 200, "User registered and verified successfully!", res);
 
-        
     } catch (error) {
         return next(error);
     }
