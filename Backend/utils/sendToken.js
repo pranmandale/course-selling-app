@@ -13,6 +13,6 @@ export const sendToken = async (user, statusCode, message, res) => {
             success: true,
             message,
             user,
-            token, // Now returning token in response as well
+            token, // returning token in response as well
         });
 };
