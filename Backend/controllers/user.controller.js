@@ -179,53 +179,6 @@ function generateEmailTemplate(verificationCode) {
 
 
 
-// export const verifyOTP = catchAsyncError(async (req, res, next) => {
-//     // const { email, otp } = req.body;
-
-//     const {  otp } = req.body;
-
-//     try {
-//         // Get the temporary user from the session
-//         const tempUser = req.session.tempUser;
-
-//         if (!tempUser || tempUser.email !== email) {
-//             return next(new ErrorHandler("Invalid or expired session. Please sign up again.", 400));
-//         }
-
-//         const { verificationCode, verificationCodeExpire, firstName, lastName, phone, password } = tempUser;
-
-//         // Check if the OTP matches
-//         if (Number(otp) !== verificationCode) {
-//             return next(new ErrorHandler("Invalid OTP!", 400));
-//         }
-
-//         // Check if the OTP has expired
-//         const currentTime = Date.now();
-//         if (currentTime > verificationCodeExpire) {
-//             return next(new ErrorHandler("Verification code expired!", 400));
-//         }
-
-//         // Create and save the user in the database
-//         const user = await User.create({
-//             firstName,
-//             lastName,
-//             email,
-//             phone,
-//             password,
-//             accountVerified: true, // Mark the account as verified
-//         });
-
-//         // Clear the session to avoid reuse of OTP
-//         req.session.tempUser = null;
-
-//         sendToken(user, 200, "User registered and verified successfully!", res)
-
-        
-//     } catch (error) {
-//         return next(error);
-//     }
-// });
-
 
 export const verifyOTP = catchAsyncError(async (req, res, next) => {
     const { otp } = req.body;
@@ -352,49 +305,50 @@ export const getUser = catchAsyncError(async (req, res, next) => {
 
 
 
-export const forgotPassword = catchAsyncError(async (req, res, next) => {
-    const {email} = req.body;
 
-    const user =  await User.findOne({
+
+
+export const forgotPassword = catchAsyncError(async (req, res, next) => {
+    const { email } = req.body;
+
+    const user = await User.findOne({
         email,
         accountVerified: true,
-    })
+    });
 
     if (!user) {
-        return next(new ErrorHandler("User not found!", 404))
+        return next(new ErrorHandler("User not found!", 404));
     }
 
     const resetPasswordToken = user.generateResetPasswordToken();
     await user.save({ validateBeforeSave: false });
 
-    // here URL is generated which is sent to users email
-    // when user clicks on to below there is option for reset password will be displayed
-    const resetPasswordUrl = `${process.env.FRONTEND_URL}/password/reset/${resetPasswordToken}`
+    // Generate Reset Password URL
+    const resetPasswordUrl = `${process.env.FRONTEND_URL}/password/reset/${resetPasswordToken}`;
 
-    const message = `Your Reset password url is \n\n ${resetPasswordUrl} \n\n`
-
-    
+    const message = `Your Reset Password link is below:\n\n${resetPasswordUrl}\n\nThis link will be valid for **10 hours** only. After that, you will need to request a new one.`;
 
     try {
-        sendEmail({
+        await sendEmail({
             email: user.email,
             subject: "Reset Password",
-            message
-        })
+            message,
+        });
 
         return res.status(202).json({
             success: true,
-            message: `Password Reset Email sent to ${user.email} successfully!`
-        })
-        
+            message: `Password reset email sent to ${user.email} successfully!`,
+        });
+
     } catch (error) {
         user.resetPasswordToken = undefined;
         user.resetPasswordExpire = undefined;
-        await user.save({ validateBeforeSave: false })
-        
-        return next(new ErrorHandler("password rest email unable to send",  404))
+        await user.save({ validateBeforeSave: false });
+
+        return next(new ErrorHandler("Password reset email could not be sent", 500));
     }
-})
+});
+
 
 
 

@@ -10,6 +10,9 @@ import { Toaster } from "react-hot-toast"
 import Verification from './components/verification/Verification'
 import PasswordForgot from './components/forgot-password/PasswordForgot'
 import ResetPassword from './components/resetPassword/ResetPassword'
+import Courses from "./components/courses/Courses"
+import Buy from "./components/buy/Buy"
+import Purchased from "./components/purchased/Purchased"
 
 const App = () => {
   return (
@@ -31,7 +34,18 @@ const App = () => {
         } />
         <Route path='/verification' element={<Verification />} />
         <Route path='/forgot-password' element={<PasswordForgot />} />
-        <Route path='/reset-password' element={ <ResetPassword/>} />
+        <Route path='/password/reset/:token' element={<ResetPassword />} />
+        
+        {/* other routes */}
+        
+        <Route path='/courses' element={
+          <ProtectedRoute>
+          <Courses />
+          </ProtectedRoute>} 
+        />
+        <Route path='/buy/:courseId' element={<Buy />} />
+        <Route path='/purchased' element={<Purchased />} />
+       
       </Routes>
    </>
   )

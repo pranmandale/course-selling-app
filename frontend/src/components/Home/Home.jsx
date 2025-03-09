@@ -95,8 +95,8 @@ const Home = () => {
         <h1 className='text-4xl font-bold text-gray-800'>Welcome to <span className='text-emerald-700'>UpSkillHub</span></h1>
         <p className='text-lg text-gray-700 mt-4 max-w-lg'>Sharpen your skills with expert-led courses and take your career to the next level.</p>
         <div className='mt-6 flex space-x-4'>
-          <button className='px-6 py-3 bg-emerald-600 text-white font-semibold rounded-lg hover:bg-emerald-500 transition'>Explore Courses</button>
-          <button className='px-6 py-3 border-2 border-emerald-600 text-emerald-700 font-semibold rounded-lg hover:bg-emerald-500 hover:text-white transition'>Course Videos</button>
+          <Link to={"/courses"} className='px-6 py-3 bg-emerald-600 text-white font-semibold rounded-lg hover:bg-emerald-500 transition'>Explore Courses</Link>
+          <Link className='px-6 py-3 border-2 border-emerald-600 text-emerald-700 font-semibold rounded-lg hover:bg-emerald-500 hover:text-white transition'>Course Videos</Link>
         </div>
       </section>
 

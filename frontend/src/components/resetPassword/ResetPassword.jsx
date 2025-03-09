@@ -1,10 +1,12 @@
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import toast from "react-hot-toast";
 import logo from "../../assets/logo2.png";
 
 function ResetPassword() {
+
+    const { token } = useParams();
 
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
@@ -22,17 +24,19 @@ function ResetPassword() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log("Submitting:", { email, password });
+        if (password !== confirmPassword) {
+            setErrorMessage("Passwords do not match!");
+            return;
+        }
 
         try {
-                const response = await axios.post(
-                "",
-                { email, password },
+            const response = await axios.put(
+                `http://localhost:8000/api/v1/user/password/reset/${token}`, // Use the token
+                { password, confirmPassword }, // Send password & confirmPassword
                 { withCredentials: true, headers: { "Content-Type": "application/json" } }
             );
 
-            // toast.success(response.data.message);
-            toast.success("Login Successful!");
+            toast.success(response.data.message || "Password Reset Successfully!");
             navigate("/login");
         } catch (error) {
             console.error("Signup Error:", error.response ? error.response.data : error);
