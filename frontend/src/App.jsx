@@ -13,6 +13,8 @@ import ResetPassword from './components/resetPassword/ResetPassword'
 import Courses from "./components/courses/Courses"
 import Buy from "./components/buy/Buy"
 import Purchased from "./components/purchased/Purchased"
+import Settings from './components/settingss/Settings'
+
 
 const App = () => {
   return (
@@ -35,16 +37,23 @@ const App = () => {
         <Route path='/verification' element={<Verification />} />
         <Route path='/forgot-password' element={<PasswordForgot />} />
         <Route path='/password/reset/:token' element={<ResetPassword />} />
+        <Route path='/settings' element={ <Settings/>} />
         
         {/* other routes */}
         
         <Route path='/courses' element={
-          <ProtectedRoute>
+          // <ProtectedRoute>
           <Courses />
-          </ProtectedRoute>} 
+          // </ProtectedRoute>
+        } 
+          
         />
         <Route path='/buy/:courseId' element={<Buy />} />
-        <Route path='/purchased' element={<Purchased />} />
+        <Route path='/purchased' element={
+          <ProtectedRoute>
+            <Purchased />
+          </ProtectedRoute>
+          } />
        
       </Routes>
    </>

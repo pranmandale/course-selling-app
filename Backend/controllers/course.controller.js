@@ -6,6 +6,11 @@ import { v2 as cloudinary } from 'cloudinary';
 import { Purchase } from "../models/purchase.model.js";
 
 
+import dotenv from "dotenv";
+dotenv.config();
+
+
+
 // this function is for creating a new course
 export const createCourse = catchAsyncError(async (req, res, next) => {
     const adminId = req.adminId;
@@ -165,38 +170,59 @@ export const courseDetail = catchAsyncError(async (req, res, next) => {
 })
 
 
-// this function is for when a user hits a route for purchasing a course
+// import Stripe from "Stripe"
+import Stripe from "stripe";
+
+const stripe = new Stripe(process.env.STRIPE_SECRET)
+// console.log(process.env.STRIPE_SECRET)
+
 export const buyCourses = catchAsyncError(async (req, res, next) => {
-    // Get userId from middleware and courseId from route params
     const { userId } = req;
     const { courseId } = req.params;
 
+
+    if (!userId) {
+        return res.status(400).json({ success: false, message: "User ID is missing" });
+    }
+
+    if (!courseId) {
+        return res.status(400).json({ success: false, message: "Course ID is missing" });
+    }
+
     try {
-        // Check if the course exists in the Course database
         const courseData = await Course.findById(courseId);
         if (!courseData) {
-            return next(new ErrorHandler("The course you want to purchase was not found!", 404));
+            return res.status(404).json({ success: false, message: "Course not found" });
         }
 
-        // Check if the course is already purchased by the user
         const existingPurchase = await Purchase.findOne({ userId, courseId });
         if (existingPurchase) {
-            return next(new ErrorHandler("You have already purchased this course!", 400));
+            return res.status(400).json({ success: false, message: "You have already purchased this course!" });
         }
 
-        // Store the purchased course in the Purchase database
+
+        // payment gateway code is written here
+
+        const amount = courseData.price;
+        const paymentIntent = await stripe.paymentIntents.create({
+            amount: amount,
+            currency: "usd",
+            payment_method_types:["card"]
+        });
+
+
         const newPurchase = await Purchase.create({ userId, courseId });
 
-        // Return success response with the course title
         return res.status(200).json({
             success: true,
             message: "Course purchased successfully!",
-            purchasedCourse: courseData.title, // Display the course title
-            user_and_courseId : newPurchase
+            purchasedCourse: courseData.title,
+            user_and_courseId: newPurchase,
+            courseData,
+            clientSecret: paymentIntent.client_secret,
         });
     } catch (error) {
-        return next(error); // Forward error to the global error handler
+        console.error("Error purchasing course:", error);
+        return res.status(500).json({ success: false, message: "Internal Server Error" });
     }
 });
-
-

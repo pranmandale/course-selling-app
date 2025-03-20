@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
@@ -10,6 +9,7 @@ import { FaDiscourse, FaDownload, FaCircleUser } from "react-icons/fa6";
 import { IoMdSettings } from "react-icons/io";
 import { IoLogIn, IoLogOut } from "react-icons/io5";
 import { FiSearch } from "react-icons/fi";
+import { CgProfile } from "react-icons/cg";
 
 const Courses = () => {
   const [courses, setCourses] = useState([]);
@@ -31,7 +31,7 @@ const Courses = () => {
       localStorage.removeItem("token");
       setIsLoggedIn(false);
       toast.success("Logout Successful");
-      navigate("/login");
+      navigate("/");
     } catch (error) {
       console.error("Error logging out", error);
       toast.error("Logout failed, try again.");
@@ -56,7 +56,7 @@ const Courses = () => {
   }, []);
 
   return (
-    <div className="flex bg-gray-100 min-h-screen">
+    <div className="flex  min-h-scree bg-green-100">
       {/* Sidebar */}
       <aside className={`fixed top-0 left-0 h-full w-64 bg-white shadow-lg p-6 transition-transform duration-300 ease-in-out transform ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"
         } md:translate-x-0 md:static`}>
@@ -64,10 +64,15 @@ const Courses = () => {
           <HiX />
         </button>
 
-        <div className="flex items-center mb-10">
-          <img src={"profile.jpg"} alt="Profile" className="rounded-full h-12 w-12" />
-          <span className="ml-3 text-xl font-semibold">Welcome</span>
+        
+
+        <div className="flex items-center gap-3 mb-10">
+          <div className="flex items-center">
+            <CgProfile className="text-3xl" />
+          </div>
+          <span className="text-xl font-semibold">Welcome</span>
         </div>
+
 
         <nav>
           <ul className="space-y-4">
@@ -87,7 +92,7 @@ const Courses = () => {
               </Link>
             </li>
             <li>
-              <Link to="#" className="flex items-center p-3 rounded-lg hover:bg-gray-200">
+              <Link to="/settings" className="flex items-center p-3 rounded-lg hover:bg-gray-200">
                 <IoMdSettings className="mr-3" /> Settings
               </Link>
             </li>
